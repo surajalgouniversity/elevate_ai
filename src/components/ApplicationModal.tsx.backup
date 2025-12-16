@@ -1,0 +1,296 @@
+import { X, Loader2, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { useState, FormEvent, useEffect, useRef } from 'react';
+import axios from 'axios';
+
+interface ApplicationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function ApplicationModal({ isOpen, onClose }: ApplicationModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState<Omit<Application, 'id' | 'created_at' | 'payment_status'>>({
+    full_name: '',
+    email: '',
+    phone: '',
+    experience_level: '',
+    current_occupation: '',
+    why_join: '',
+    payment_plan: 'upfront'
+  });
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .insert([formData])
+        .select()
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setSubmitted(true);
+        const paymentLinks = {
+          upfront: 'https://rzp.io/rzp/48cDvUQF',
+          trial: 'https://rzp.io/rzp/YYfmuga',
+          monthly: 'https://rzp.io/rzp/QaCoRHi',
+          test: 'https://rzp.io/rzp/r3IMtie9'
+        };
+
+        const paymentUrl = paymentLinks[formData.payment_plan as keyof typeof paymentLinks];
+
+        setTimeout(() => {
+          window.location.href = paymentUrl;
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Failed to submit application. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-8 max-w-md w-full border border-[#f21028]/30 shadow-[0_0_50px_rgba(242,16,40,0.3)]">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-[#f21028] rounded-full mx-auto flex items-center justify-center">
+              <Loader2 size={32} className="text-white animate-spin" />
+            </div>
+            <h3 className="text-2xl font-bold text-white">Application Submitted!</h3>
+            <p className="text-gray-300">
+              Loading payment page...
+            </p>
+            <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
+              <Loader2 size={16} className="animate-spin" />
+              <span>Please wait</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6 lg:p-8 max-w-2xl w-full border border-[#f21028]/30 shadow-[0_0_50px_rgba(242,16,40,0.3)] my-8 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between mb-6 gap-4">
+          <h2 className="text-2xl lg:text-3xl font-bold text-[#f21028] flex-1 min-w-0">
+            Apply Now
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-white font-medium mb-2">Full Name *</label>
+            <input
+              type="text"
+              required
+              value={formData.full_name}
+              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+              className="w-full bg-gray-900 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#f21028] transition-colors"
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-white font-medium mb-2">Email *</label>
+              <input
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full bg-gray-900 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#f21028] transition-colors"
+                placeholder="your@email.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white font-medium mb-2">Phone *</label>
+              <input
+                type="tel"
+                required
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full bg-gray-900 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#f21028] transition-colors"
+                placeholder="+91 98765 43210"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-white font-medium mb-2">Experience Level *</label>
+            <select
+              required
+              value={formData.experience_level}
+              onChange={(e) => setFormData({ ...formData, experience_level: e.target.value })}
+              className="w-full bg-gray-900 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#f21028] transition-colors"
+            >
+              <option value="">Select your experience</option>
+              <option value="college_student">College Student</option>
+              <option value="0-2_years">0-2 Years</option>
+              <option value="2-5_years">2-5 Years</option>
+              <option value="5+_years">5+ Years</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-white font-medium mb-2">Current Occupation *</label>
+            <input
+              type="text"
+              required
+              value={formData.current_occupation}
+              onChange={(e) => setFormData({ ...formData, current_occupation: e.target.value })}
+              className="w-full bg-gray-900 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#f21028] transition-colors"
+              placeholder="e.g., Software Engineer at XYZ"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white font-medium mb-2">Why do you want to join? *</label>
+            <textarea
+              required
+              rows={4}
+              value={formData.why_join}
+              onChange={(e) => setFormData({ ...formData, why_join: e.target.value })}
+              className="w-full bg-slate-800 border border-blue-500/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors resize-none"
+              placeholder="Tell us about your goals and why you want to become an AI engineer..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-white font-medium mb-2">Payment Plan *</label>
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 p-4 bg-gray-900 border-2 border-white/20 rounded-lg cursor-pointer hover:border-[#f21028] transition-colors">
+                <input
+                  type="radio"
+                  name="payment_plan"
+                  value="upfront"
+                  checked={formData.payment_plan === 'upfront'}
+                  onChange={(e) => setFormData({ ...formData, payment_plan: e.target.value })}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-semibold">Pay Upfront</span>
+                    <span className="bg-[#f21028] text-white text-xs font-bold px-2 py-1 rounded">
+                      SAVE 50%
+                    </span>
+                  </div>
+                  <p className="text-gray-400 text-sm mt-1">
+                    <span className="line-through">₹60,000</span>{' '}
+                    <span className="text-[#f21028] font-bold">₹30,000</span> one-time
+                  </p>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-4 bg-gray-900 border-2 border-white/20 rounded-lg cursor-pointer hover:border-[#f21028] transition-colors">
+                <input
+                  type="radio"
+                  name="payment_plan"
+                  value="monthly"
+                  checked={formData.payment_plan === 'monthly'}
+                  onChange={(e) => setFormData({ ...formData, payment_plan: e.target.value })}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-semibold">Monthly EMI</span>
+                    <span className="bg-[#f21028] text-white text-xs font-bold px-2 py-1 rounded">
+                      SAVE 25%
+                    </span>
+                  </div>
+                  <p className="text-gray-400 text-sm mt-1">
+                    <span className="line-through">₹60,000</span>{' '}
+                    <span className="text-white font-bold">₹15,000/month</span> for 3 months (₹45,000 total)
+                  </p>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-4 bg-gray-900 border-2 border-white/20 rounded-lg cursor-pointer hover:border-[#f21028] transition-colors">
+                <input
+                  type="radio"
+                  name="payment_plan"
+                  value="trial"
+                  checked={formData.payment_plan === 'trial'}
+                  onChange={(e) => setFormData({ ...formData, payment_plan: e.target.value })}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-semibold">14-Day Trial</span>
+                    <span className="bg-gray-600 text-white text-xs font-bold px-2 py-1 rounded">
+                      MONTHLY-GROCERY BILL
+                    </span>
+                  </div>
+                  <p className="text-gray-400 text-sm mt-1">
+                    <span className="text-white font-bold">₹5,000</span> one-time
+                  </p>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-4 bg-gray-900 border-2 border-green-500/50 rounded-lg cursor-pointer hover:border-green-500 transition-colors">
+                <input
+                  type="radio"
+                  name="payment_plan"
+                  value="test"
+                  checked={formData.payment_plan === 'test'}
+                  onChange={(e) => setFormData({ ...formData, payment_plan: e.target.value })}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-semibold">Test Payment</span>
+                    <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+                      FOR TESTING ONLY
+                    </span>
+                  </div>
+                  <p className="text-gray-400 text-sm mt-1">
+                    <span className="text-white font-bold">₹1</span> one-time (test mode)
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div className="bg-[#f21028]/10 border border-[#f21028]/30 rounded-lg p-4 mt-6">
+            <p className="text-gray-300 text-sm">
+              <strong>Note:</strong> 14-Day Trial is MONTHLY-GROCERY BILL. Full program payments (Upfront & EMI) come with a placemnt support guarantee.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#f21028] text-white px-8 py-4 rounded-lg font-bold hover:shadow-[0_0_30px_rgba(242,16,40,0.8)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              'Submit & Proceed to Payment'
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

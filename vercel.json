@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "server/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/$1"
+    }
+  ],
+  "env": {
+    "VITE_SUPABASE_URL": "https://apmtmtivcgwelnmwjqvj.supabase.co/",
+    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwbXRtdGl2Y2d3ZWxubXdqcXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTU5NjMsImV4cCI6MjA4MTQ3MTk2M30.CH4X8diOjdUSqCbMUK7-O55G2HTtmIhetqztLZn7YII",
+    "VITE_RAZORPAY_KEY_ID": "rzp_test_RsIgKgV5QjenFy",
+    "VITE_RAZORPAY_KEY_SECRET": "5acucSKRwK3rrLGHRFpCZ6al"
+  }
+}
