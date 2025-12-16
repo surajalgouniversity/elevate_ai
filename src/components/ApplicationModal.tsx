@@ -125,6 +125,12 @@ export default function ApplicationModal({ isOpen, onClose }: ApplicationModalPr
     return amounts[plan] || 0;
   };
 
+  const getPaymentAmountWithGST = (plan: string): number => {
+    const baseAmount = getPaymentAmount(plan);
+    const gstAmount = baseAmount * 0.18; // 18% GST
+    return Math.round(baseAmount + gstAmount);
+  };
+
   const handlePaymentSuccess = async (response: RazorpayResponse, appId: string) => {
     try {
       paymentInProgressRef.current = false; // Payment completed
@@ -331,7 +337,7 @@ export default function ApplicationModal({ isOpen, onClose }: ApplicationModalPr
     setErrorMessage('');
 
     try {
-      const amount = getPaymentAmount(formData.payment_plan);
+      const amount = getPaymentAmountWithGST(formData.payment_plan);
       
       if (amount <= 0) {
         throw new Error('Invalid payment plan selected');
@@ -639,7 +645,10 @@ export default function ApplicationModal({ isOpen, onClose }: ApplicationModalPr
                   </div>
                   <p className="text-gray-400 text-sm mt-1">
                     <span className="line-through">₹60,000</span>{' '}
-                    <span className="text-[#f21028] font-bold">₹30,000</span> one-time
+                    <span className="text-white font-bold">₹30,000</span> + GST (18%)
+                  </p>
+                  <p className="text-[#f21028] font-bold text-sm mt-1">
+                    Total: ₹{getPaymentAmountWithGST('upfront').toLocaleString('en-IN')}
                   </p>
                 </div>
               </label>
@@ -663,7 +672,10 @@ export default function ApplicationModal({ isOpen, onClose }: ApplicationModalPr
                   </div>
                   <p className="text-gray-400 text-sm mt-1">
                     <span className="line-through">₹60,000</span>{' '}
-                    <span className="text-white font-bold">₹15,000/month</span> for 3 months (₹45,000 total)
+                    <span className="text-white font-bold">₹15,000/month</span> + GST (18%)
+                  </p>
+                  <p className="text-[#f21028] font-bold text-sm mt-1">
+                    First Payment: ₹{getPaymentAmountWithGST('monthly').toLocaleString('en-IN')}
                   </p>
                 </div>
               </label>
@@ -686,7 +698,10 @@ export default function ApplicationModal({ isOpen, onClose }: ApplicationModalPr
                     </span>
                   </div>
                   <p className="text-gray-400 text-sm mt-1">
-                    <span className="text-white font-bold">₹5,000</span> one-time
+                    <span className="text-white font-bold">₹5,000</span> + GST (18%)
+                  </p>
+                  <p className="text-[#f21028] font-bold text-sm mt-1">
+                    Total: ₹{getPaymentAmountWithGST('trial').toLocaleString('en-IN')}
                   </p>
                 </div>
               </label>
