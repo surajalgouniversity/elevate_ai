@@ -54,7 +54,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="https://www.algouniversity.com/privacy/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#f21028] transition-colors text-sm">
+                <a href="/privacy" className="text-gray-400 hover:text-[#f21028] transition-colors text-sm">
                   Privacy Policy
                 </a>
               </li>
