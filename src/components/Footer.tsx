@@ -44,13 +44,13 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-4">Resources</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-gray-400 hover:text-[#f21028] transition-colors text-sm">
-                  Blogs
+                <a href= "https://www.algouniversity.com/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#f21028] transition-colors text-sm">
+                  Leap
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-[#f21028] transition-colors text-sm">
-                  Terms of Service
+                <a href="https://www.algouniversity.com/accelerator/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#f21028] transition-colors text-sm">
+                  Accelerator
                 </a>
               </li>
               <li>
