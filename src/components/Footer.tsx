@@ -70,7 +70,7 @@ export default function Footer() {
                   className="text-gray-400 hover:text-[#f21028] transition-colors text-sm flex items-center gap-2"
                 >
                   <Mail size={16} />
-                   admissions@algouniversity.com
+                  courses@algouniversity.com
                 </a>
               </li>
               <li>
