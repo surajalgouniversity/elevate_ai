@@ -71,7 +71,12 @@ app.get('/health', (req, res) => {
 // Create Razorpay Order
 app.post('/api/order', async (req, res) => {
   try {
-    const { amount, currency = 'INR', applicationData } = req.body;
+    let { amount, currency = 'INR', applicationData } = req.body;
+
+    // Override amount for monthly plan to charge ₹53,100
+    if (applicationData && applicationData.payment_plan === 'monthly') {
+      amount = 53100; // Fixed amount for EMI plan
+    }
 
     // Validation
     if (!amount || amount <= 0) {
