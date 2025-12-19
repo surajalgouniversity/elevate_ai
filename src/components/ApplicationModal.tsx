@@ -252,7 +252,7 @@ export default function ApplicationModal({ isOpen, onClose }: ApplicationModalPr
         throw new Error('Razorpay SDK failed to load. Please check your internet connection.');
       }
 
-      const options = {
+      const options: any = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: amount * 100, // Amount in paise
         currency: 'INR',
@@ -297,6 +297,19 @@ export default function ApplicationModal({ isOpen, onClose }: ApplicationModalPr
         },
         timeout: 900, // 15 minutes
       };
+
+      // Restrict payment methods based on payment plan
+      if (formData.payment_plan === 'monthly') {
+        // Only show EMI/Cardless EMI options for monthly plan
+        options.method = {
+          emi: true,
+          card: false,
+          netbanking: false,
+          wallet: false,
+          upi: false,
+          paylater: false
+        };
+      }
 
       setPaymentStatus('processing-payment');
       setStatusMessage('Complete your payment in the Razorpay window...');
